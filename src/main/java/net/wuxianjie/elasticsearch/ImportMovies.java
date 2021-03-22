@@ -18,16 +18,11 @@ public class ImportMovies {
   public static final String PATH_TO_CSV = "ml-latest-small/movies.csv";
   public static final String INDEX_NAME = "movies";
 
-  public static void main(String[] args) throws IOException, URISyntaxException, CsvValidationException {
+  public static Map<String, String> getMovieMap() throws URISyntaxException, IOException, CsvValidationException {
 
-    EsUtils.bulkIndex(readCsv(PATH_TO_CSV));
-  }
+    Map<String, String> result = new HashMap<>();
 
-  public static BulkRequest readCsv(String pathToCsv) throws IOException, CsvValidationException, URISyntaxException {
-
-    BulkRequest request = new BulkRequest();
-
-    CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(CsvUtils.getFilePath(pathToCsv)));
+    CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(CsvUtils.getFilePath(PATH_TO_CSV)));
 
     Map<String, String> row;
     while ((row = reader.readMap()) != null) {
@@ -35,10 +30,34 @@ public class ImportMovies {
       String titleAndYear = row.get("title");
       Map<String, String> titleMap = parseTitle(titleAndYear);
 
+      result.put(row.get("movieId"), titleMap.get("title"));
+    }
+
+    return result;
+  }
+
+  public static void main(String[] args) throws IOException, URISyntaxException, CsvValidationException {
+    EsUtils.bulkIndex(readCsv());
+  }
+
+  private static BulkRequest readCsv() throws IOException, CsvValidationException, URISyntaxException {
+
+    BulkRequest request = new BulkRequest();
+
+    CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(CsvUtils.getFilePath(PATH_TO_CSV)));
+
+    Map<String, String> row;
+    while ((row = reader.readMap()) != null) {
+
+      String movieId = row.get("movieId");
+      String titleAndYear = row.get("title");
+
+      Map<String, String> titleMap = parseTitle(titleAndYear);
+
       request.add(new IndexRequest(INDEX_NAME)
-        .id(row.get("movieId"))
+        .id(movieId)
         .source(XContentType.JSON,
-          "id", row.get("movieId"),
+          "id", movieId,
           "title", titleMap.get("title"),
           "year", titleMap.get("year"),
           "genre", row.get("genres")));
@@ -47,7 +66,7 @@ public class ImportMovies {
     return request;
   }
 
-  public static Map<String, String> parseTitle(String str) {
+  private static Map<String, String> parseTitle(String str) {
 
     int beginIndexOfYear = str.lastIndexOf(" (");
 
