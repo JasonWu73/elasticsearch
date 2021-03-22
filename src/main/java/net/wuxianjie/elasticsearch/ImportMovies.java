@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import net.wuxianjie.elasticsearch.util.CsvUtils;
+import net.wuxianjie.elasticsearch.util.FileUtils;
 import net.wuxianjie.elasticsearch.util.EsUtils;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -18,19 +18,21 @@ public class ImportMovies {
   public static final String PATH_TO_CSV = "ml-latest-small/movies.csv";
   public static final String INDEX_NAME = "movies";
 
-  public static Map<String, String> getMovieMap() throws URISyntaxException, IOException, CsvValidationException {
+  public static Map<String, String> getMovieMap()
+    throws URISyntaxException, IOException, CsvValidationException {
 
     Map<String, String> result = new HashMap<>();
 
-    CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(CsvUtils.getFilePath(PATH_TO_CSV)));
+    try (CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(FileUtils.getFilePath(PATH_TO_CSV)))) {
 
-    Map<String, String> row;
-    while ((row = reader.readMap()) != null) {
+      Map<String, String> row;
+      while ((row = reader.readMap()) != null) {
 
-      String titleAndYear = row.get("title");
-      Map<String, String> titleMap = parseTitle(titleAndYear);
+        String titleAndYear = row.get("title");
+        Map<String, String> titleMap = parseTitle(titleAndYear);
 
-      result.put(row.get("movieId"), titleMap.get("title"));
+        result.put(row.get("movieId"), titleMap.get("title"));
+      }
     }
 
     return result;
@@ -44,7 +46,7 @@ public class ImportMovies {
 
     BulkRequest request = new BulkRequest();
 
-    CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(CsvUtils.getFilePath(PATH_TO_CSV)));
+    CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(FileUtils.getFilePath(PATH_TO_CSV)));
 
     Map<String, String> row;
     while ((row = reader.readMap()) != null) {

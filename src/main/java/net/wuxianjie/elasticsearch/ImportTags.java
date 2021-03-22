@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
-import net.wuxianjie.elasticsearch.util.CsvUtils;
+import net.wuxianjie.elasticsearch.util.FileUtils;
 import net.wuxianjie.elasticsearch.util.EsUtils;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -27,20 +27,21 @@ public class ImportTags {
 
     BulkRequest request = new BulkRequest();
 
-    CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(CsvUtils.getFilePath(PATH_TO_CSV)));
+    try (CSVReaderHeaderAware reader = new CSVReaderHeaderAware(new FileReader(FileUtils.getFilePath(PATH_TO_CSV)))) {
 
-    Map<String, String> row;
-    while ((row = reader.readMap()) != null) {
+      Map<String, String> row;
+      while ((row = reader.readMap()) != null) {
 
-      String movieId = row.get("movieId");
+        String movieId = row.get("movieId");
 
-      request.add(new IndexRequest(INDEX_NAME)
-        .source(XContentType.JSON,
-          "user_id", row.get("userId"),
-          "movie_id", movieId,
-          "title", movieMap.get(movieId),
-          "tag", row.get("tag"),
-          "timestamp", row.get("timestamp")));
+        request.add(new IndexRequest(INDEX_NAME)
+          .source(XContentType.JSON,
+            "user_id", row.get("userId"),
+            "movie_id", movieId,
+            "title", movieMap.get(movieId),
+            "tag", row.get("tag"),
+            "timestamp", row.get("timestamp")));
+      }
     }
 
     return request;

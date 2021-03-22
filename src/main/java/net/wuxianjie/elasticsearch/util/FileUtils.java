@@ -6,7 +6,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import net.wuxianjie.elasticsearch.ImportMovies;
 
-public class CsvUtils {
+public class FileUtils {
 
   public static String getFilePath(String path) throws URISyntaxException {
 
