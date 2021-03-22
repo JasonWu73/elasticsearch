@@ -12,16 +12,16 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 
-public class ImportRatings {
+public class ImportTags {
 
-  public static final String PATH_TO_CSV = "ml-latest-small/ratings.csv";
-  public static final String INDEX_NAME = "ratings";
+  public static final String PATH_TO_CSV = "ml-latest-small/tags.csv";
+  public static final String INDEX_NAME = "tags";
 
-  public static void main(String[] args) throws CsvValidationException, IOException, URISyntaxException {
+  public static void main(String[] args) throws IOException, URISyntaxException, CsvValidationException {
     EsUtils.bulkIndex(readCsv());
   }
 
-  private static BulkRequest readCsv() throws IOException, CsvValidationException, URISyntaxException {
+  public static BulkRequest readCsv() throws IOException, CsvValidationException, URISyntaxException {
 
     Map<String, String> movieMap = ImportMovies.getMovieMap();
 
@@ -39,7 +39,7 @@ public class ImportRatings {
           "user_id", row.get("userId"),
           "movie_id", movieId,
           "title", movieMap.get(movieId),
-          "rating", row.get("rating"),
+          "tag", row.get("tag"),
           "timestamp", row.get("timestamp")));
     }
 
