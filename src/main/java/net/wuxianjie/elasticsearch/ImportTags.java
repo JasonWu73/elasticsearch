@@ -38,7 +38,7 @@ public class ImportTags {
           .source(XContentType.JSON,
             "user_id", row.get("userId"),
             "movie_id", movieId,
-            "title", movieMap.get(movieId),
+            "movie_title", movieMap.get(movieId),
             "tag", row.get("tag"),
             "timestamp", row.get("timestamp")));
       }

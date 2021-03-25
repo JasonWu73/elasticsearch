@@ -38,7 +38,7 @@ public class ImportRatings {
           .source(XContentType.JSON,
             "user_id", row.get("userId"),
             "movie_id", movieId,
-            "title", movieMap.get(movieId),
+            "movie_title", movieMap.get(movieId),
             "rating", row.get("rating"),
             "timestamp", row.get("timestamp")));
       }
